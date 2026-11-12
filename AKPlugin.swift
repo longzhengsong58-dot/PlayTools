@@ -14,11 +14,16 @@ private struct AKAppSettingsData: Codable {
     var hideTitleBar: Bool?
     var floatingWindow: Bool?
     var resolution: Int?
+    var resizeWindowOnLaunch: Bool?
+    var windowWidth: Int?
+    var windowHeight: Int?
     var resizableAspectRatioWidth: Int?
     var resizableAspectRatioHeight: Int?
 }
 
 class AKPlugin: NSObject, Plugin {
+    private let sizedWindows = NSHashTable<NSWindow>.weakObjects()
+
     required override init() {
         super.init()
         if let window = NSApplication.shared.windows.first {
@@ -42,6 +47,7 @@ class AKPlugin: NSObject, Plugin {
             if let aspectRatio = self.aspectRatioSetting {
                 window.contentAspectRatio = aspectRatio
             }
+            self.applyInitialWindowSize(to: window)
 
             NSWindow.allowsAutomaticWindowTabbing = true
         }
@@ -69,7 +75,29 @@ class AKPlugin: NSObject, Plugin {
                 if let aspectRatio = self.aspectRatioSetting {
                     win.contentAspectRatio = aspectRatio
                 }
+                self.applyInitialWindowSize(to: win)
         }
+    }
+
+    /// Size the content before a legacy game caches its render surface. Setting
+    /// contentAspectRatio alone only constrains future user-initiated resizes.
+    private func applyInitialWindowSize(to window: NSWindow) {
+        guard Self.akAppSettingsData?.resolution == 6,
+              Self.akAppSettingsData?.resizeWindowOnLaunch == true,
+              window.level == .normal,
+              !window.styleMask.contains(.fullScreen),
+              !sizedWindows.contains(window),
+              let width = Self.akAppSettingsData?.windowWidth, width > 0,
+              let height = Self.akAppSettingsData?.windowHeight, height > 0,
+              let screen = window.screen ?? NSScreen.main else { return }
+        sizedWindows.add(window)
+
+        let requested = NSSize(width: width, height: height)
+        let available = window.contentRect(forFrameRect: screen.visibleFrame).size
+        guard available.width > 0, available.height > 0 else { return }
+        let scale = min(1, available.width / requested.width, available.height / requested.height)
+        window.setContentSize(NSSize(width: requested.width * scale, height: requested.height * scale))
+        window.center()
     }
 
     var screenCount: Int {

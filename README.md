@@ -1,3 +1,24 @@
+# PVZ2 launch-window compatibility fork
+
+Companion to [longzhengsong58-dot/PlayCover](https://github.com/longzhengsong58-dot/PlayCover). This fork preserves the upstream license and attribution.
+
+Adds the optional per-app `resizeWindowOnLaunch` setting to AKInterface. With `resolution = 6`, a positive `windowWidth`/`windowHeight`, and this flag enabled, each eligible normal window is sized once to fit the visible display while preserving the requested aspect ratio. Repeated key-window notifications do not reset a user's window size. Missing/false settings preserve upstream behavior. Private scene-geometry hooks are bypassed by the existing resizable resolution mode.
+
+Locally compiled using Command Line Tools and tested as a game-local AKInterface component with Chinese PVZ2 4.2.8: the startup/welcome screen is upright and its controls are visible. Native fullscreen transitions still retain a stale game render surface; use the launch window and restart after a fullscreen test. In-game gameplay and a complete PlayTools/PlayCover Xcode build remain unverified.
+
+To compile just the changed macOS bridge from this repository:
+
+```sh
+mkdir -p build/ModuleCache
+swiftc -module-cache-path build/ModuleCache -target arm64-apple-macos12.0 \
+  -emit-library -module-name AKInterface -o build/AKInterface \
+  Plugin.swift AKPlugin.swift
+```
+
+This command produces only a development component, not a complete installable PlayCover application. Full builds use the upstream Xcode workflow below.
+
+---
+
 # PlayTools
 
 PlayTools is an essential part of [PlayCover](https://github.com/PlayCover/PlayCover). PlayTools implements core functions of PlayCover, including display control, key mapping and bypassing.
