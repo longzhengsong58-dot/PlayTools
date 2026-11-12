@@ -92,12 +92,19 @@ class AKPlugin: NSObject, Plugin {
               let screen = window.screen ?? NSScreen.main else { return }
         sizedWindows.add(window)
 
+        guard let fittedSize = maximumContentSize(for: window, on: screen) else { return }
+        window.setContentSize(fittedSize)
+        window.center()
+    }
+
+    private func maximumContentSize(for window: NSWindow, on screen: NSScreen) -> NSSize? {
+        guard let width = Self.akAppSettingsData?.windowWidth, width > 0,
+              let height = Self.akAppSettingsData?.windowHeight, height > 0 else { return nil }
         let requested = NSSize(width: width, height: height)
         let available = window.contentRect(forFrameRect: screen.visibleFrame).size
-        guard available.width > 0, available.height > 0 else { return }
+        guard available.width > 0, available.height > 0 else { return nil }
         let scale = min(1, available.width / requested.width, available.height / requested.height)
-        window.setContentSize(NSSize(width: requested.width * scale, height: requested.height * scale))
-        window.center()
+        return NSSize(width: requested.width * scale, height: requested.height * scale)
     }
 
     var screenCount: Int {

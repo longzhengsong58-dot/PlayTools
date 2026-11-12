@@ -4,7 +4,7 @@ Companion to [longzhengsong58-dot/PlayCover](https://github.com/longzhengsong58-
 
 Adds the optional per-app `resizeWindowOnLaunch` setting to AKInterface. With `resolution = 6`, a positive `windowWidth`/`windowHeight`, and this flag enabled, each eligible normal window is sized once to fit the visible display while preserving the requested aspect ratio. Repeated key-window notifications do not reset a user's window size. Missing/false settings preserve upstream behavior. Private scene-geometry hooks are bypassed by the existing resizable resolution mode.
 
-Locally compiled using Command Line Tools and tested as a game-local AKInterface component with Chinese PVZ2 4.2.8: the startup/welcome screen is upright and its controls are visible. Native fullscreen transitions still retain a stale game render surface; use the launch window and restart after a fullscreen test. In-game gameplay and a complete PlayTools/PlayCover Xcode build remain unverified.
+Locally compiled using Command Line Tools and tested as a game-local AKInterface component with Chinese PVZ2 4.2.8: the startup/welcome screen is upright, its controls are visible, and the window uses the largest configured 16:10 size that fits the visible display. This matches the game's stable render surface and removes the duplicated strip previously visible at the right edge. Fullscreen and macOS zoom are intentionally unsupported because changing the live render surface can produce duplicated or stale regions in this legacy game. In-game gameplay and a complete PlayTools/PlayCover Xcode build remain unverified.
 
 To compile just the changed macOS bridge from this repository:
 
